@@ -1,0 +1,6 @@
+CREATE TABLE teachers (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    password TEXT NOT NULL
+);
