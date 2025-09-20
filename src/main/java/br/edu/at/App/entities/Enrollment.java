@@ -41,4 +41,8 @@ public class Enrollment {
     public String getCourseCode() {
         return course.getCode();
     }
+
+    public boolean hasGrade() {
+        return grade != null;
+    }
 }

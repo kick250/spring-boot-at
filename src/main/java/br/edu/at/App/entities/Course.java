@@ -41,14 +41,14 @@ public class Course {
 
     public List<Student> getApprovedStudents() {
         return enrollments.stream()
-                .filter(enrollment -> enrollment.getGrade() >= PASSING_GRADE)
+                .filter(enrollment -> enrollment.hasGrade() && enrollment.getGrade() >= PASSING_GRADE)
                 .map(Enrollment::getStudent)
                 .toList();
     }
 
     public List<Student> getFailedStudents() {
         return enrollments.stream()
-                .filter(enrollment -> enrollment.getGrade() < PASSING_GRADE)
+                .filter(enrollment -> enrollment.hasGrade() && enrollment.getGrade() < PASSING_GRADE)
                 .map(Enrollment::getStudent)
                 .toList();
     }
