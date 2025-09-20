@@ -3,11 +3,14 @@ package br.edu.at.App.controllers;
 import br.edu.at.App.entities.Course;
 import br.edu.at.App.entities.Enrollment;
 import br.edu.at.App.entities.Student;
+import br.edu.at.App.entities.Teacher;
 import br.edu.at.App.repositories.CoursesRepository;
 import br.edu.at.App.repositories.EnrollmentsRepository;
 import br.edu.at.App.repositories.StudentsRepository;
+import br.edu.at.App.repositories.TeachersRepository;
 import br.edu.at.App.requests.AddStudentRequest;
 import br.edu.at.App.requests.CourseCreateRequest;
+import br.edu.at.App.services.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +33,10 @@ class CoursesControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
+    private TeachersRepository teachersRepository;
+    @Autowired
+    private TokenService tokenService;
+    @Autowired
     private StudentsRepository studentsRepository;
     @Autowired
     private CoursesRepository coursesRepository;
@@ -40,12 +47,19 @@ class CoursesControllerTest {
     private Student student2;
     private Course course;
     private Enrollment enrollment;
+    private String jwtToken;
 
     @BeforeEach
     public void setup() {
+        teachersRepository.deleteAll();
         enrollmentsRepository.deleteAll();
         coursesRepository.deleteAll();
         studentsRepository.deleteAll();
+
+        Teacher teacher = new Teacher("Teacher Name", "teacher.name@test.com.br", "123456");
+        teachersRepository.save(teacher);
+        jwtToken = tokenService.generateToken(teacher);
+
 
         student1 = new Student("Joao Test", "123.456.789-00", "joao.test@test.com.br", "12345678901", "Ladeira da gloria, 26");
         studentsRepository.save(student1);
@@ -65,16 +79,24 @@ class CoursesControllerTest {
 
     @AfterEach
     public void tearDown() {
+        teachersRepository.deleteAll();
         enrollmentsRepository.deleteAll();
         coursesRepository.deleteAll();
         studentsRepository.deleteAll();
     }
 
     @Test
+    public void testGetAll_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/courses"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     public void testGetAll() throws Exception {
         course = coursesRepository.findByIdWithEnrollments(course.getId()).orElseThrow();
 
-        mockMvc.perform(get("/courses"))
+        mockMvc.perform(get("/courses")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(course.getId()))
@@ -96,10 +118,17 @@ class CoursesControllerTest {
     }
 
     @Test
+    public void testGetApprovedStudents_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/courses/" + course.getId() + "/approved_students"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     public void testGetApprovedStudents() throws Exception {
         course = coursesRepository.findByIdWithEnrollments(course.getId()).orElseThrow();
 
-        mockMvc.perform(get("/courses/" + course.getId() + "/approved_students"))
+        mockMvc.perform(get("/courses/" + course.getId() + "/approved_students")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(course.getId()))
                 .andExpect(jsonPath("$.name").value(course.getName()))
@@ -114,10 +143,17 @@ class CoursesControllerTest {
     }
 
     @Test
+    public void testGetFailedStudents_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/courses/" + course.getId() + "/failed_students"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     public void testGetFailedStudents() throws Exception {
         course = coursesRepository.findByIdWithEnrollments(course.getId()).orElseThrow();
 
-        mockMvc.perform(get("/courses/" + course.getId() + "/failed_students"))
+        mockMvc.perform(get("/courses/" + course.getId() + "/failed_students")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(course.getId()))
                 .andExpect(jsonPath("$.name").value(course.getName()))
@@ -133,14 +169,32 @@ class CoursesControllerTest {
 
     @Test
     public void testGetApprovedStudents_CourseNotFound() throws Exception {
-        mockMvc.perform(get("/courses/9999/approved_students"))
+        mockMvc.perform(get("/courses/9999/approved_students")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void testGetFailedStudents_CourseNotFound() throws Exception {
-        mockMvc.perform(get("/courses/9999/failed_students"))
+        mockMvc.perform(get("/courses/9999/failed_students")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testCreate_whenNotAuthenticated() throws Exception {
+        String courseName = "Course Test";
+        String courseCode = "ASDFGH";
+        CourseCreateRequest request = new CourseCreateRequest(courseName, courseCode);
+
+        assertEquals(1, coursesRepository.count());
+
+        mockMvc.perform(post("/courses")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        assertEquals(1, coursesRepository.count());
     }
 
     @Test
@@ -153,7 +207,8 @@ class CoursesControllerTest {
 
         mockMvc.perform(post("/courses")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isCreated());
 
         assertEquals(2, coursesRepository.count());
@@ -173,7 +228,8 @@ class CoursesControllerTest {
 
         mockMvc.perform(post("/courses")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isBadRequest());
 
         assertEquals(1, coursesRepository.count());
@@ -189,7 +245,8 @@ class CoursesControllerTest {
 
         mockMvc.perform(post("/courses")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isBadRequest());
 
         assertEquals(1, coursesRepository.count());
@@ -205,7 +262,8 @@ class CoursesControllerTest {
 
         mockMvc.perform(post("/courses/" + course.getId() + "/add_student")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk());
 
         assertEquals(3, enrollmentsRepository.count());
@@ -223,7 +281,8 @@ class CoursesControllerTest {
 
         mockMvc.perform(post("/courses/9999/add_student")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound());
 
         assertEquals(2, enrollmentsRepository.count());
@@ -237,7 +296,8 @@ class CoursesControllerTest {
 
         mockMvc.perform(post("/courses/" + course.getId() + "/add_student")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound());
 
         assertEquals(2, enrollmentsRepository.count());

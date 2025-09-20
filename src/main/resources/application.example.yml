@@ -1,6 +1,9 @@
 spring:
   application:
     name: "App"
+    security:
+      token:
+        secret: ${TOKEN_SECRET:12345678}
   datasource:
     url: jdbc:h2:mem:maindb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
