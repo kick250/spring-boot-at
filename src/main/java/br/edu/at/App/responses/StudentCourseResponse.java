@@ -10,9 +10,9 @@ public record StudentCourseResponse(
 ) {
     public StudentCourseResponse(Enrollment enrollment) {
         this(
-                enrollment.getCourse().getId(),
-                enrollment.getCourse().getName(),
-                enrollment.getCourse().getCode(),
+                enrollment.getCourseId(),
+                enrollment.getCourseName(),
+                enrollment.getCourseCode(),
                 enrollment.getGrade()
         );
     }

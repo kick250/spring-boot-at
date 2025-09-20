@@ -28,7 +28,7 @@ public class Course {
     @Getter
     private List<Enrollment> enrollments;
 
-    private final double PASSING_GRADE = 7.0;
+    private static final double PASSING_GRADE = 7.0;
 
     public Course(String name, String code) {
         this.name = name;

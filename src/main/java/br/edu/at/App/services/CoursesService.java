@@ -24,13 +24,13 @@ public class CoursesService {
         return coursesRepository.findAll();
     }
 
+    public Course getById(Long courseId) throws CourseNotFoundException {
+        return coursesRepository.findById(courseId).orElseThrow(CourseNotFoundException::new);
+    }
+
     public void create(String name, String code) {
         Course course = new Course(name, code);
         coursesRepository.save(course);
-    }
-
-    public Course getById(Long courseId) throws CourseNotFoundException {
-        return coursesRepository.findById(courseId).orElseThrow(CourseNotFoundException::new);
     }
 
     public void addStudent(Long courseId, Long studentId) throws CourseNotFoundException, StudentNotFoundException {

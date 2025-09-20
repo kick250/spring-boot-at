@@ -11,6 +11,7 @@ import lombok.*;
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
     private Long id;
     @ManyToOne
     @JoinColumn(name = "student_id")
@@ -29,4 +30,15 @@ public class Enrollment {
         this.course = course;
     }
 
+    public Long getCourseId() {
+        return course.getId();
+    }
+
+    public String getCourseName() {
+        return course.getName();
+    }
+
+    public String getCourseCode() {
+        return course.getCode();
+    }
 }

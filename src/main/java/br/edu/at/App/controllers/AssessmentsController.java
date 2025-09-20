@@ -1,10 +1,12 @@
 package br.edu.at.App.controllers;
 
 import br.edu.at.App.exceptions.EnrollmentNotFoundException;
+import br.edu.at.App.exceptions.InvalidGradeException;
 import br.edu.at.App.requests.AssessmentRequest;
 import br.edu.at.App.services.AssessmentsService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,8 +24,10 @@ public class AssessmentsController {
         try {
             assessmentsService.createAssessment(request.studentId(), request.courseId(), request.grade());
             return ResponseEntity.ok("Nota lançada com sucesso.");
+        } catch (InvalidGradeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (EnrollmentNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

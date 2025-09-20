@@ -4,6 +4,9 @@ import br.edu.at.App.entities.Course;
 import br.edu.at.App.entities.Enrollment;
 import br.edu.at.App.entities.Student;
 import br.edu.at.App.exceptions.CourseNotFoundException;
+import br.edu.at.App.exceptions.InvalidCoursesQuantity;
+import br.edu.at.App.exceptions.StudentCpfAlreadyExists;
+import br.edu.at.App.exceptions.StudentEmailAlreadyExists;
 import br.edu.at.App.repositories.CoursesRepository;
 import br.edu.at.App.repositories.EnrollmentsRepository;
 import br.edu.at.App.repositories.StudentsRepository;
@@ -24,8 +27,10 @@ public class StudentsService {
         return studentsRepository.findAll();
     }
 
-    public void create(String name, String cpf, String email, String phone, String address, Set<Long> courseIds) throws CourseNotFoundException {
-        if (courseIds.isEmpty()) throw new IllegalArgumentException("O aluno deve estar matriculado em pelo menos um curso.");
+    public void create(String name, String cpf, String email, String phone, String address, Set<Long> courseIds) throws CourseNotFoundException, InvalidCoursesQuantity, StudentEmailAlreadyExists, StudentCpfAlreadyExists {
+        if (courseIds.isEmpty()) throw new InvalidCoursesQuantity();
+        if (studentsRepository.existsByEmail(email)) throw new StudentEmailAlreadyExists();
+        if (studentsRepository.existsByCpf(cpf)) throw new StudentCpfAlreadyExists();
 
         List<Course> courses = getCourses(courseIds);
 

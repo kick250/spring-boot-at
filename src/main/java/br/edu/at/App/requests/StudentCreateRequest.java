@@ -1,5 +1,6 @@
 package br.edu.at.App.requests;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -23,6 +24,7 @@ public record StudentCreateRequest(
         @NotEmpty
         List<Long> courseIds
 ) {
+    @JsonIgnore
     public Set<Long> getUniqueCourseIds() {
         return Set.copyOf(courseIds);
     }

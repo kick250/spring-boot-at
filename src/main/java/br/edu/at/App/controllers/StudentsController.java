@@ -2,6 +2,9 @@ package br.edu.at.App.controllers;
 
 import br.edu.at.App.entities.Student;
 import br.edu.at.App.exceptions.CourseNotFoundException;
+import br.edu.at.App.exceptions.InvalidCoursesQuantity;
+import br.edu.at.App.exceptions.StudentCpfAlreadyExists;
+import br.edu.at.App.exceptions.StudentEmailAlreadyExists;
 import br.edu.at.App.requests.StudentCreateRequest;
 import br.edu.at.App.responses.StudentResponse;
 import br.edu.at.App.services.StudentsService;
@@ -31,7 +34,7 @@ public class StudentsController {
         try {
             studentsService.create(request.name(), request.cpf(), request.email(), request.phone(), request.address(), request.getUniqueCourseIds());
             return ResponseEntity.status(HttpStatus.CREATED).body("Aluno criado com sucesso.");
-        } catch (CourseNotFoundException e) {
+        } catch (CourseNotFoundException | InvalidCoursesQuantity | StudentEmailAlreadyExists | StudentCpfAlreadyExists e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }

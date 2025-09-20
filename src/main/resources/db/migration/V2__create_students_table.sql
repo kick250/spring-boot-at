@@ -4,5 +4,5 @@ CREATE TABLE students (
     cpf VARCHAR(14) NOT NULL,
     email VARCHAR(100) NOT NULL,
     phone VARCHAR(100) NOT NULL,
-    address TEXT NOT NULL,
+    address TEXT NOT NULL
 );
