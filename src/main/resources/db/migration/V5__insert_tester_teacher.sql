@@ -1,0 +1,1 @@
+INSERT INTO teachers (name, email, password) values ('Teacher Tester', 'teacher.tester@test.com.br', '$2a$12$0CeeDWwsdJwsbxcq.l/dteUm2pjl4HCFwiFpn338t7CLc5Nd.2D/.');
