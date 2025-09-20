@@ -29,6 +29,7 @@ public class SecurityConfigurations {
                 })
                 .authorizeHttpRequests(request -> {
                     request.requestMatchers(HttpMethod.POST, "/login").permitAll();
+                    request.requestMatchers("/h2-console/**").permitAll();
                     request.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
